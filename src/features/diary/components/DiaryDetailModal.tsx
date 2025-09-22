@@ -221,7 +221,7 @@ export function DiaryDetailModal({ isOpen, onClose, date }: DiaryDetailModalProp
                           </h4>
                         </div>
                         <div className="text-neutral-900 whitespace-pre-wrap leading-relaxed">
-                          {value || '작성되지 않음'}
+                          {typeof value === 'string' ? value : '작성되지 않음'}
                         </div>
                       </Card>
                     ))}
