@@ -8,6 +8,9 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
+import { Toaster } from '@/components/ui/toaster';
+import { useEffect } from 'react';
+import { useAuthStore } from '@/features/auth/hooks/useAuthStore';
 
 function makeQueryClient() {
   return new QueryClient({
@@ -37,6 +40,16 @@ function getQueryClient() {
   }
 }
 
+function AuthInitializer({ children }: { children: React.ReactNode }) {
+  const initialize = useAuthStore((state) => state.initialize);
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  return <>{children}</>;
+}
+
 export default function Providers({ children }: { children: React.ReactNode }) {
   // NOTE: Avoid useState when initializing the query client if you don't
   //       have a suspense boundary between this and the code that may
@@ -51,7 +64,12 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthInitializer>
+          {children}
+          <Toaster />
+        </AuthInitializer>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }
