@@ -37,18 +37,7 @@ const signInSchema = z.object({
   password: z.string().min(6, '비밀번호는 최소 6자 이상이어야 합니다'),
 });
 
-const signUpSchema = z.object({
-  email: z.string().email('유효한 이메일을 입력해주세요'),
-  password: z.string().min(6, '비밀번호는 최소 6자 이상이어야 합니다'),
-  confirmPassword: z.string().min(6, '비밀번호 확인을 입력해주세요'),
-  fullName: z.string().min(2, '이름은 최소 2자 이상이어야 합니다'),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: '비밀번호가 일치하지 않습니다',
-  path: ['confirmPassword'],
-});
-
 type SignInForm = z.infer<typeof signInSchema>;
-type SignUpForm = z.infer<typeof signUpSchema>;
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -61,6 +50,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
   const signInMutation = useSignIn();
   const signUpMutation = useSignUp();
 
+  // 로그인 폼 상태 (기존 유지)
   const signInForm = useForm<SignInForm>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -69,14 +59,20 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
     },
   });
 
-  const signUpForm = useForm<SignUpForm>({
-    resolver: zodResolver(signUpSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-      confirmPassword: '',
-      fullName: '',
-    },
+  // 회원가입 폼 useState 상태 관리
+  const [signUpForm, setSignUpForm] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  // 회원가입 폼 에러 메시지 상태
+  const [signUpErrors, setSignUpErrors] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   });
 
   const onSignIn = (data: SignInForm) => {
@@ -91,16 +87,110 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
     });
   };
 
-  const onSignUp = (data: SignUpForm) => {
-    const { confirmPassword, ...submitData } = data;
+  // 유효성 검사 함수들
+  const validateFullName = (value: string): string => {
+    if (value.length < 2) {
+      return '이름은 최소 2자 이상이어야 합니다.';
+    }
+    return '';
+  };
+
+  const validateEmail = (value: string): string => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value)) {
+      return '유효한 이메일을 입력해주세요.';
+    }
+    return '';
+  };
+
+  const validatePassword = (value: string): string => {
+    if (value.length < 6) {
+      return '비밀번호는 최소 6자 이상이어야 합니다.';
+    }
+    return '';
+  };
+
+  const validateConfirmPassword = (password: string, confirmPassword: string): string => {
+    if (confirmPassword !== password) {
+      return '비밀번호 확인이 일치하지 않습니다.';
+    }
+    return '';
+  };
+
+  // 실시간 유효성 검사를 위한 핸들러
+  const handleSignUpChange = (field: keyof typeof signUpForm, value: string) => {
+    // 폼 값 업데이트
+    setSignUpForm(prev => ({ ...prev, [field]: value }));
+
+    // 에러 메시지 업데이트
+    let errorMessage = '';
+    switch (field) {
+      case 'fullName':
+        errorMessage = validateFullName(value);
+        break;
+      case 'email':
+        errorMessage = validateEmail(value);
+        break;
+      case 'password':
+        errorMessage = validatePassword(value);
+        // 비밀번호가 변경되면 비밀번호 확인도 다시 검사
+        if (signUpForm.confirmPassword) {
+          setSignUpErrors(prev => ({
+            ...prev,
+            confirmPassword: validateConfirmPassword(value, signUpForm.confirmPassword)
+          }));
+        }
+        break;
+      case 'confirmPassword':
+        errorMessage = validateConfirmPassword(signUpForm.password, value);
+        break;
+    }
+
+    setSignUpErrors(prev => ({ ...prev, [field]: errorMessage }));
+  };
+
+  // 폼 제출 시 전체 유효성 검사
+  const validateSignUpForm = (): boolean => {
+    const errors = {
+      fullName: validateFullName(signUpForm.fullName),
+      email: validateEmail(signUpForm.email),
+      password: validatePassword(signUpForm.password),
+      confirmPassword: validateConfirmPassword(signUpForm.password, signUpForm.confirmPassword),
+    };
+
+    setSignUpErrors(errors);
+    return !Object.values(errors).some(error => error !== '');
+  };
+
+  const onSignUp = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // 전체 유효성 검사
+    if (!validateSignUpForm()) {
+      return;
+    }
+
+    // 유효성 검사 통과 시 회원가입 실행
     signUpMutation.mutate({
-      email: submitData.email,
-      password: submitData.password,
-      fullName: submitData.fullName,
+      email: signUpForm.email,
+      password: signUpForm.password,
+      fullName: signUpForm.fullName,
     }, {
       onSuccess: () => {
         onClose();
-        signUpForm.reset();
+        // 폼 초기화
+        setSignUpForm({
+          fullName: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+        });
+        setSignUpErrors({
+          fullName: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+        });
       },
     });
   };
@@ -108,7 +198,19 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
   const handleClose = () => {
     onClose();
     signInForm.reset();
-    signUpForm.reset();
+    // 회원가입 폼 초기화
+    setSignUpForm({
+      fullName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    });
+    setSignUpErrors({
+      fullName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    });
   };
 
   return (
@@ -192,108 +294,98 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
 
           {/* 회원가입 탭 */}
           <TabsContent value="signup" className="space-y-4">
-            <Form {...signUpForm}>
-              <form onSubmit={signUpForm.handleSubmit(onSignUp)} className="space-y-4">
-                <FormField
-                  control={signUpForm.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>이름</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <User className="absolute left-3 top-3 h-4 w-4 text-neutral-400" />
-                          <Input
-                            {...field}
-                            placeholder="이름을 입력하세요"
-                            className="pl-10"
-                            disabled={signUpMutation.isPending}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <form onSubmit={onSignUp} className="space-y-4">
+              {/* 이름 필드 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  이름
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-neutral-400" />
+                  <Input
+                    value={signUpForm.fullName}
+                    onChange={(e) => handleSignUpChange('fullName', e.target.value)}
+                    placeholder="이름을 입력하세요"
+                    className="pl-10"
+                    disabled={signUpMutation.isPending}
+                  />
+                </div>
+                {signUpErrors.fullName && (
+                  <p className="text-red-500 text-sm mt-1">{signUpErrors.fullName}</p>
+                )}
+              </div>
 
-                <FormField
-                  control={signUpForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>이메일</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-3 h-4 w-4 text-neutral-400" />
-                          <Input
-                            {...field}
-                            type="email"
-                            placeholder="이메일을 입력하세요"
-                            className="pl-10"
-                            disabled={signUpMutation.isPending}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              {/* 이메일 필드 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  이메일
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-neutral-400" />
+                  <Input
+                    type="email"
+                    value={signUpForm.email}
+                    onChange={(e) => handleSignUpChange('email', e.target.value)}
+                    placeholder="이메일을 입력하세요"
+                    className="pl-10"
+                    disabled={signUpMutation.isPending}
+                  />
+                </div>
+                {signUpErrors.email && (
+                  <p className="text-red-500 text-sm mt-1">{signUpErrors.email}</p>
+                )}
+              </div>
 
-                <FormField
-                  control={signUpForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>비밀번호</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Lock className="absolute left-3 top-3 h-4 w-4 text-neutral-400" />
-                          <Input
-                            {...field}
-                            type="password"
-                            placeholder="비밀번호를 입력하세요"
-                            className="pl-10"
-                            disabled={signUpMutation.isPending}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              {/* 비밀번호 필드 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  비밀번호
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-neutral-400" />
+                  <Input
+                    type="password"
+                    value={signUpForm.password}
+                    onChange={(e) => handleSignUpChange('password', e.target.value)}
+                    placeholder="비밀번호를 입력하세요"
+                    className="pl-10"
+                    disabled={signUpMutation.isPending}
+                  />
+                </div>
+                {signUpErrors.password && (
+                  <p className="text-red-500 text-sm mt-1">{signUpErrors.password}</p>
+                )}
+              </div>
 
-                <FormField
-                  control={signUpForm.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>비밀번호 확인</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Lock className="absolute left-3 top-3 h-4 w-4 text-neutral-400" />
-                          <Input
-                            {...field}
-                            type="password"
-                            placeholder="비밀번호를 다시 입력하세요"
-                            className="pl-10"
-                            disabled={signUpMutation.isPending}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              {/* 비밀번호 확인 필드 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  비밀번호 확인
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-neutral-400" />
+                  <Input
+                    type="password"
+                    value={signUpForm.confirmPassword}
+                    onChange={(e) => handleSignUpChange('confirmPassword', e.target.value)}
+                    placeholder="비밀번호를 다시 입력하세요"
+                    className="pl-10"
+                    disabled={signUpMutation.isPending}
+                  />
+                </div>
+                {signUpErrors.confirmPassword && (
+                  <p className="text-red-500 text-sm mt-1">{signUpErrors.confirmPassword}</p>
+                )}
+              </div>
 
-                <Button
-                  type="submit"
-                  className="w-full bg-primary-700 hover:bg-primary-500"
-                  disabled={signUpMutation.isPending}
-                >
-                  {signUpMutation.isPending ? '회원가입 중...' : '회원가입'}
-                </Button>
-              </form>
-            </Form>
+              <Button
+                type="submit"
+                className="w-full bg-primary-700 hover:bg-primary-500"
+                disabled={signUpMutation.isPending}
+              >
+                {signUpMutation.isPending ? '회원가입 중...' : '회원가입'}
+              </Button>
+            </form>
           </TabsContent>
         </Tabs>
 
