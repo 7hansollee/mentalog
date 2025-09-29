@@ -16,6 +16,7 @@ import { useCreateDiaryEntry } from '@/features/diary/hooks/useDiaryQueries';
 import { AuthModal } from '@/features/auth/components/AuthModal';
 import { DiaryCompletionModal } from '@/features/diary/components/DiaryCompletionModal';
 import { useSignOut } from '@/features/auth/hooks/useAuthQueries';
+import { LogoutTimer } from '@/features/auth/components/LogoutTimer';
 import { format, isToday } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
@@ -311,11 +312,14 @@ export default function WritePage() {
             {/* 사용자 정보 및 로그아웃 */}
             {isAuthenticated && user && (
               <div className="flex items-center space-x-3">
-                <div className="flex items-center space-x-2">
-                  <User className="w-4 h-4 text-neutral-600" />
-                  <span className="text-sm text-neutral-700">
-                    {user.user_metadata?.full_name || user.email}
-                  </span>
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2">
+                    <User className="w-4 h-4 text-neutral-600" />
+                    <span className="text-sm text-neutral-700">
+                      {user.user_metadata?.full_name || user.email}
+                    </span>
+                  </div>
+                  <LogoutTimer />
                 </div>
                 <Button
                   variant="outline"

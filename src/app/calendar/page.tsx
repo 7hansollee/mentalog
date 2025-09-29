@@ -9,6 +9,7 @@ import { useAuthStore } from '@/features/auth/hooks/useAuthStore';
 import { useDiaryEntriesByMonth } from '@/features/diary/hooks/useDiaryQueries';
 import { useSignOut } from '@/features/auth/hooks/useAuthQueries';
 import { AuthModal } from '@/features/auth/components/AuthModal';
+import { LogoutTimer } from '@/features/auth/components/LogoutTimer';
 import { DiaryDetailModal } from '@/features/diary/components/DiaryDetailModal';
 
 // 감정별 색상 및 레이블 정의 (일기 작성 페이지와 매칭)
@@ -231,11 +232,14 @@ export default function CalendarPage() {
             <div className="flex items-center space-x-3">
               {/* 사용자 정보 */}
               {isAuthenticated && user && (
-                <div className="flex items-center space-x-2">
-                  <User className="w-4 h-4 text-neutral-600" />
-                  <span className="text-sm text-neutral-700">
-                    {user.user_metadata?.full_name || user.email}
-                  </span>
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2">
+                    <User className="w-4 h-4 text-neutral-600" />
+                    <span className="text-sm text-neutral-700">
+                      {user.user_metadata?.full_name || user.email}
+                    </span>
+                  </div>
+                  <LogoutTimer />
                 </div>
               )}
               

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Noto_Sans_KR } from 'next/font/google';
 import './globals.css';
 import Providers from './providers';
+import NetworkErrorBoundary from '@/components/NetworkErrorBoundary';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -27,11 +28,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html suppressHydrationWarning>
+    <html lang="ko" suppressHydrationWarning>
+      {/* ✅ Umami 스크립트는 <head> 안에 넣어야 작동 */}
+      <head>
+        <script
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id="9aad6fd2-cfab-4b12-a326-2a560c8964c6"
+        ></script>
+      </head>
       <body
         className={`${inter.variable} ${notoSansKr.variable} font-sans antialiased`}
       >
-        <Providers>{children}</Providers>
+        <NetworkErrorBoundary>
+          <Providers>{children}</Providers>
+        </NetworkErrorBoundary>
       </body>
     </html>
   );

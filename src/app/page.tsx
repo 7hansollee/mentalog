@@ -10,6 +10,7 @@ import { useAuthStore } from '@/features/auth/hooks/useAuthStore';
 import { useSignOut } from '@/features/auth/hooks/useAuthQueries';
 import { AuthModal } from '@/features/auth/components/AuthModal';
 import { LoginSuccessModal } from '@/features/auth/components/LoginSuccessModal';
+import { LogoutTimer } from '@/features/auth/components/LogoutTimer';
 
 // 일기 + 멘탈(하트) 조합 아이콘 컴포넌트
 const DiaryHeartIcon = ({ className }: { className?: string }) => (
@@ -53,11 +54,14 @@ export default function Home() {
               {/* 인증 관련 UI */}
               {isAuthenticated && user ? (
                 <div className="flex items-center space-x-3">
-                  <div className="flex items-center space-x-2">
-                    <User className="w-4 h-4 text-neutral-600" />
-                    <span className="text-sm text-neutral-700">
-                      {user.user_metadata?.full_name || user.email}
-                    </span>
+                  <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2">
+                      <User className="w-4 h-4 text-neutral-600" />
+                      <span className="text-sm text-neutral-700">
+                        {user.user_metadata?.full_name || user.email}
+                      </span>
+                    </div>
+                    <LogoutTimer />
                   </div>
                   <Button
                     variant="outline"

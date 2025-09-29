@@ -180,6 +180,25 @@ function Calendar() {
 - 변수명이 `NEXT_PUBLIC_` 접두사를 포함하는지 확인
 - 개발 서버 재시작 (`npm run dev`)
 
+### 배포 환경 환경 변수 설정
+배포 플랫폼(Vercel, Netlify 등)에서 환경 변수를 설정해야 합니다:
+
+**Vercel 배포 시:**
+1. Vercel 대시보드 → Project Settings → Environment Variables
+2. 다음 변수들을 추가:
+   - `NEXT_PUBLIC_SUPABASE_URL`: `https://your-project-id.supabase.co`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: `your-supabase-anon-key`
+   - `SUPABASE_SERVICE_ROLE_KEY`: `your-service-role-key`
+3. 저장 후 프로젝트 재배포
+
+**Netlify 배포 시:**
+1. Netlify 대시보드 → Site Settings → Environment Variables
+2. 위와 동일한 환경 변수들 추가
+3. 저장 후 사이트 재빌드
+
+**기타 플랫폼:**
+- 각 플랫폼의 환경 변수 설정 방법에 따라 동일한 변수들을 추가
+
 ### 마이그레이션 오류
 - 각 마이그레이션을 순서대로 실행했는지 확인
 - Supabase SQL Editor에서 에러 메시지 확인

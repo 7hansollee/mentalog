@@ -9,6 +9,7 @@ import { useState, useMemo } from 'react';
 import { useAuthStore } from '@/features/auth/hooks/useAuthStore';
 import { useDiaryStats } from '@/features/diary/hooks/useDiaryQueries';
 import { AuthModal } from '@/features/auth/components/AuthModal';
+import { LogoutTimer } from '@/features/auth/components/LogoutTimer';
 import { subDays, subWeeks, subMonths } from 'date-fns';
 
 // 감정 한글 매핑 (일기 작성 페이지와 동일)

@@ -20,7 +20,10 @@ function validateSupabaseConfig(): boolean {
   }
   
   // 플레이스홀더 값인지 확인
-  if (supabaseUrl.includes('your-supabase-url') || supabaseAnonKey.includes('your-supabase-anon-key')) {
+  if (supabaseUrl.includes('your-supabase-url') || 
+      supabaseUrl.includes('your-project-id') || 
+      supabaseAnonKey.includes('your-supabase-anon-key') ||
+      supabaseAnonKey.includes('your-anon-key')) {
     return false;
   }
   
@@ -50,18 +53,20 @@ let supabaseClient: any = null;
 if (typeof window !== 'undefined') {
   if (!validateSupabaseConfig()) {
     console.warn('⚠️  Supabase 환경 변수가 올바르게 설정되지 않았습니다.');
-    console.warn('🔧  .env.local 파일에서 다음 값들을 실제 Supabase 프로젝트 값으로 설정해주세요:');
+    console.warn('🔧  배포 환경에서는 플랫폼의 환경 변수 설정에서 다음 값들을 추가해주세요:');
     console.warn('   - NEXT_PUBLIC_SUPABASE_URL: https://your-project-id.supabase.co');
     console.warn('   - NEXT_PUBLIC_SUPABASE_ANON_KEY: your-anon-key');
-    console.warn('🏠  개발 모드에서는 더미 클라이언트를 사용합니다.');
+    console.warn('   - SUPABASE_SERVICE_ROLE_KEY: your-service-role-key');
+    console.warn('📖  자세한 설정 방법은 docs/supabase-setup.md를 참고하세요.');
+    console.warn('🏠  환경 변수가 없으면 더미 클라이언트를 사용합니다.');
     
     // 환경 변수가 없으면 더미 객체 사용
     supabaseClient = {
       auth: {
         getSession: () => Promise.resolve({ data: { session: null }, error: null }),
         getUser: () => Promise.resolve({ data: { user: null }, error: null }),
-        signUp: () => Promise.resolve({ data: null, error: new Error('Supabase 환경 변수가 설정되지 않았습니다') }),
-        signInWithPassword: () => Promise.resolve({ data: null, error: new Error('Supabase 환경 변수가 설정되지 않았습니다') }),
+        signUp: () => Promise.resolve({ data: null, error: new Error('회원가입 실패: Supabase 환경 변수가 설정되지 않았습니다. 배포 플랫폼의 환경 변수 설정을 확인해주세요.') }),
+        signInWithPassword: () => Promise.resolve({ data: null, error: new Error('로그인 실패: Supabase 환경 변수가 설정되지 않았습니다. 배포 플랫폼의 환경 변수 설정을 확인해주세요.') }),
         signOut: () => Promise.resolve({ error: null }),
         onAuthStateChange: () => ({ data: { subscription: null } }),
         resetPasswordForEmail: () => Promise.resolve({ error: null }),

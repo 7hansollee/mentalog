@@ -41,11 +41,19 @@ function getQueryClient() {
 }
 
 function AuthInitializer({ children }: { children: React.ReactNode }) {
-  const initialize = useAuthStore((state) => state.initialize);
+  const { initialize, cleanup } = useAuthStore((state) => ({
+    initialize: state.initialize,
+    cleanup: state.cleanup,
+  }));
 
   useEffect(() => {
     initialize();
-  }, [initialize]);
+
+    // 컴포넌트 언마운트 시 cleanup
+    return () => {
+      cleanup();
+    };
+  }, [initialize, cleanup]);
 
   return <>{children}</>;
 }
