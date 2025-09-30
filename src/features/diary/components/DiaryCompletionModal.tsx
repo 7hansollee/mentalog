@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Heart, Calendar, Home } from 'lucide-react';
 import { generatePersonalizedResponse } from '@/lib/sentiment-analysis';
 import { useRouter } from 'next/navigation';
+import { useMemo } from 'react';
 
 interface DiaryCompletionModalProps {
   isOpen: boolean;
@@ -26,8 +27,11 @@ export function DiaryCompletionModal({
 }: DiaryCompletionModalProps) {
   const router = useRouter();
   
-  // 감정 분석 및 위로 메시지 생성
-  const response = generatePersonalizedResponse(selectedEmotion, answers, personalMessage);
+  // 감정 분석 및 위로 메시지 생성 (useMemo로 캐싱하여 리렌더링 시 같은 메시지 유지)
+  const response = useMemo(() => 
+    generatePersonalizedResponse(selectedEmotion, answers, personalMessage),
+    [selectedEmotion, answers, personalMessage]
+  );
   
   const handleGoToCalendar = () => {
     onClose();
