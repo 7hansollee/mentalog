@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Heart, Calendar, Home } from 'lucide-react';
 import { generatePersonalizedResponse } from '@/lib/sentiment-analysis';
 import { useRouter } from 'next/navigation';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 interface DiaryCompletionModalProps {
   isOpen: boolean;
@@ -27,11 +27,33 @@ export function DiaryCompletionModal({
 }: DiaryCompletionModalProps) {
   const router = useRouter();
   
-  // 감정 분석 및 위로 메시지 생성 (useMemo로 캐싱하여 리렌더링 시 같은 메시지 유지)
-  const response = useMemo(() => 
-    generatePersonalizedResponse(selectedEmotion, answers, personalMessage),
-    [selectedEmotion, answers, personalMessage]
-  );
+  // 모달이 열릴 때 한 번만 메시지 생성하고 고정
+  const [fixedResponse, setFixedResponse] = useState<{
+    emotions: string[];
+    comfortMessage: string;
+    encouragement: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (isOpen && !fixedResponse) {
+      const result = generatePersonalizedResponse(selectedEmotion, answers, personalMessage);
+      setFixedResponse(result);
+    }
+  }, [isOpen, selectedEmotion, answers, personalMessage, fixedResponse]);
+
+  // 모달이 닫힐 때 메시지 초기화
+  useEffect(() => {
+    if (!isOpen) {
+      setFixedResponse(null);
+    }
+  }, [isOpen]);
+
+  // 메시지가 아직 생성되지 않았으면 기본 메시지 사용
+  const response = fixedResponse || {
+    emotions: [selectedEmotion],
+    comfortMessage: "오늘 하루도 고생 많았어요. 당신의 솔직한 마음을 나누어주셔서 감사해요. 내일은 더 나은 하루가 될 거예요.",
+    encouragement: "오늘도 최선을 다한 당신이 자랑스러워요."
+  };
   
   const handleGoToCalendar = () => {
     onClose();
