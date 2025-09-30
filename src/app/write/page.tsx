@@ -142,8 +142,8 @@ const emotionQuestions = {
   ],
   stuck: [
     { key: 'situation', question: '오늘 어떤 일이 뜻대로 되지 않았나요?', placeholder: '막혔거나 잘 풀리지 않은 일을 구체적으로 적어보세요...' },
-    { key: 'obstacle', question: '혹시 원인은 뭐라고 생각하세요?', placeholder: '문제의 핵심이나 장애요소를 적어보세요...' },
-    { key: 'alternative', question: '다른 관점에서 접근할 수 있는 방법이 있을까요?', placeholder: '새로운 시각이나 대안적 접근법을 적어보세요...' }
+    { key: 'obstacle', question: '그 일이 안 풀린 원인은 뭐라고 생각하세요?', placeholder: '문제의 핵심이나 장애요소를 적어보세요...' },
+    { key: 'alternative', question: '다음에 또 반복하지 않기 위해 여러분이 대비할 게 있을까요?', placeholder: '미래에 같은 문제를 예방하기 위한 대비책을 적어보세요...' }
   ],
   financial: [
     { key: 'situation', question: '오늘 어떤 상황에서 경제적 부담을 느꼈나요?', placeholder: '경제적 어려움을 느낀 구체적인 상황을 적어보세요...' },
