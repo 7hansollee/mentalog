@@ -97,8 +97,8 @@ export default function Home() {
             </h1>
             
             <p className="text-xl text-primary-600 leading-relaxed font-light">
-              지친 감정을 기록하며 멘탈을 케어하는,<br />
-              <span className="font-medium text-primary-700">1인 사업가 멘탈 케어 서비스 Mentalog.</span>
+              지친 감정을 기록하면서 멘탈을 회복하는,<br />
+              <span className="font-medium text-primary-700">1인 사업가 멘탈 케어 서비스 Mentalog 멘탈로그.</span>
             </p>
 
             <div className="flex flex-col sm:flex-row gap-5">
