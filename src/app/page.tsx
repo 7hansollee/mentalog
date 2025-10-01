@@ -92,12 +92,12 @@ export default function Home() {
         <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
           <div className="space-y-8">
             <h1 className="text-3xl md:text-4xl font-semibold text-primary-900 leading-tight tracking-tight">
-              혼자 일하는 당신,<br />
+              1인 사업가 여러분,<br />
               <span className="text-primary-700">스트레스도 혼자 삭히고 있나요?</span>
             </h1>
             
             <p className="text-xl text-primary-600 leading-relaxed font-light">
-              지금 내 감정을 기록하며 멘탈을 케어하는,<br />
+              지친 감정을 기록하며 멘탈을 케어하는,<br />
               <span className="font-medium text-primary-700">1인 사업가 멘탈 케어 서비스 Mentalog.</span>
             </p>
 
